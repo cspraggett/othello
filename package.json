@@ -1,0 +1,25 @@
+{
+  "name": "cljs-starter",
+  "version": "1.0.0",
+  "description": "A minimal ClojureScript + Reagent project",
+  "dependencies": {
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0"
+  },
+  "devDependencies": {
+    "shadow-cljs": "2.10.13"
+  },
+  "scripts": {
+    "start": "npx shadow-cljs watch dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clojurecraft/cljs-starter.git"
+  },
+  "author": "Rafal Dittwald",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/clojurecraft/cljs-starter/issues"
+  },
+  "homepage": "https://github.com/clojurecraft/cljs-starter#readme"
+}

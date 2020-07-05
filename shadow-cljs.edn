@@ -1,0 +1,12 @@
+{:source-paths ["src"]
+ :dependencies [[reagent "0.10.0"]
+                [cider/cider-nrepl "0.22.4"]]
+ :nrepl
+ {:port 3333}
+ :dev-http {8080 ["public/"
+                  "target/public/"]}
+ :builds {:dev {:target :browser
+                :output-dir "target/public/dev"
+                :asset-path "/dev"
+                :modules {:main {:init-fn othello.core/render!}}
+                :devtools {:after-load othello.core/render!}}}}
