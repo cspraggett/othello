@@ -24,7 +24,8 @@ A minimal clojurescript + reagent project (using shadow-cljs)
   - `npm start`
   - (wait)
   - open http://localhost:8080
-  - in Vim, enter the command: `:Piggieback dev`
+  - in Vim, enter the command: `:Connect 3333`
+  - and `:CljEval (shadow/repl :frontend)`
   - you should now be able to evaluate code (via :Require, cpp, or c!!)
 
 - edit `./src/demo/core.cljs` (ex. change "Hello World" to "Hello Bob")
