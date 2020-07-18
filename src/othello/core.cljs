@@ -23,8 +23,6 @@
                    (assoc board coordinate (initial-state coordinate))
                    (assoc board coordinate blank-tile))){})))
 
-(make-board)
-
 (defonce board-state (r/atom (make-board)))
 (defonce turn (r/atom black-tile))
 
