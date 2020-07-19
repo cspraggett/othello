@@ -15,9 +15,9 @@
 
 (defn make-board
   []
-  (->> (for [x (range 8)
-                      y (range 8)]
-                  [x y])
+  (->> (for [row (range 8)
+             column (range 8)]
+         [row column])
        (reduce (fn [board coordinate]
                  (if (contains? initial-state coordinate)
                    (assoc board coordinate (initial-state coordinate))
@@ -26,43 +26,26 @@
 (defonce board-state (r/atom (make-board)))
 (defonce turn (r/atom black-tile))
 
-(println @turn)
-
-(defn find-current-stones
-  []
-  (filter (fn [[_ v]]
-            (= v @turn)) @board-state))
-(find-current-stones)
-
-(defn is-valid-coord?
-  [num]
-  (and (num >= 0) (num < 8)))
-
-(defn get-neighbours
-  [[x y]]
-  )
-
 (println @board-state)
+
 (defn square
-  [[x y]]
+  [coordinate curse]
   [:button
       {:on-click (fn []
-                   (swap! board-state assoc [x y] "🥦"))}
-   [:span  (@board-state [x y])]])
-(println @board-state)
+                   (swap! board-state assoc coordinate "🥦"))}
+   [:span  @curse]])
+
 (defn board-component
   []
-  (->> (for [x (range 8)
-             y (range 8)]
-         [x y])
-       (map (fn [[x y :as coordinate]]
-              (if (= y 7)
-                [:span {:key coordinate} (square coordinate) [:div]]
-                [:span {:key coordinate} (square coordinate)])))))
+  (->> (for [row (range 8)
+             column (range 8)]
+         [row column])
+       (map (fn [[row column :as coordinate]]
+              (if (= column 7)
+                [:span {:key coordinate} (square coordinate (r/cursor board-state [coordinate])) [:div]]
+                [:span {:key coordinate} (square coordinate (r/cursor board-state [coordinate]))])))))
 
-(map (fn [[k v]]
-       (println k)) @board-state)
-
+(def t (r/cursor board-state [[0 0]]))
 
 (defn app-view []
   [:div
