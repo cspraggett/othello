@@ -24,9 +24,21 @@
                    (assoc board coordinate blank-tile))){})))
 
 (defonce board-state (r/atom (make-board)))
-(defonce turn (r/atom black-tile))
+(defonce current-turn (r/atom black-tile))
 
-(println @board-state)
+(defn get-current-turn-icon
+  []
+  @current-turn)
+
+(defn get-other-icon
+  []
+  (if (= (get-current-turn-icon) black-tile)
+    white-tile
+    black-tile))
+
+(defn change-current-turn!
+  []
+  (reset! current-turn (get-other-icon)))
 
 (defn square
   [coordinate curse]
@@ -44,8 +56,6 @@
               (if (= column 7)
                 [:span {:key coordinate} (square coordinate (r/cursor board-state [coordinate])) [:div]]
                 [:span {:key coordinate} (square coordinate (r/cursor board-state [coordinate]))])))))
-
-(def t (r/cursor board-state [[0 0]]))
 
 (defn app-view []
   [:div
