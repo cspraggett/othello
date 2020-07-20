@@ -53,16 +53,17 @@
   [current-square]
   (mapv (fn [[k v]]
           (->> (mapv + current-square v)
-               (assoc {} k))) change))
+               (assoc {} k))) change-directions))
 
 (defn find-adjacent-opponent-squares
   [neighbours]
   (filter (fn [k]
-            (= @board-state (first (vals k))) (get-other-icon)) neighbours))
+            (println k)
+            (= (@board-state (first (vals k))) (get-other-icon))) neighbours))
 
 (defn check-next-square
   [square]
-  (let [next-square-value (mapv + (change (first (keys square)))
+  (let [next-square-value (mapv + (change-directions (first (keys square)))
                                 (first (vals square)))]
     (cond
       (= (@board-state next-square-value) blank-tile)
@@ -83,8 +84,18 @@
       (find-adjacent-opponent-squares)
       (is-empty?)))
 
+(find-valid-moves [3 4])
 
+(map find-valid-moves [[3 4] [4 3]])
 
+(change-current-turn!)
+
+(->> (filter (fn [current]
+       (= (last current) (get-current-turn-icon))) @board-state)
+     (keys)
+     #_(map find-valid-moves))
+
+(println @board-state)
 (defn square
   [coordinate curse]
   [:button
