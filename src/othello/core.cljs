@@ -93,15 +93,16 @@
 (->> (filter (fn [current]
        (= (last current) (get-current-turn-icon))) @board-state)
      (keys)
-     #_(map find-valid-moves))
+     (map find-valid-moves))
 
 (println @board-state)
+
 (defn square
-  [coordinate curse]
+  [coordinate]
   [:button
       {:on-click (fn []
                    (swap! board-state assoc coordinate "🥦"))}
-   [:span  @curse]])
+   [:span  (@board-state coordinate)]])
 
 (defn board-component
   []
@@ -109,16 +110,14 @@
              column (range 8)]
          [row column])
        (map (fn [[row column :as coordinate]]
-              (if (= column 7)
-                [:span {:key coordinate} (square coordinate (r/cursor board-state [coordinate])) [:div]]
-                [:span {:key coordinate} (square coordinate (r/cursor board-state [coordinate]))])))))
+                [:span {:key coordinate} (square coordinate) (when (= column 7) [:div])]))))
 
 (defn app-view []
   [:div
   [:style styles/css]
-   (doall(board-component))])
-(defn render! []
+   (doall (board-component))])
 
+(defn render! []
   (rdom/render
     [app-view]
     (js/document.getElementById "app")))
