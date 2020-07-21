@@ -15,61 +15,109 @@
 
 (defn make-board
   []
-  (->> (for [x (range 8)
-                      y (range 8)]
-                  [x y])
+  (->> (for [row (range 8)
+             column (range 8)]
+         [row column])
        (reduce (fn [board coordinate]
                  (if (contains? initial-state coordinate)
                    (assoc board coordinate (initial-state coordinate))
                    (assoc board coordinate blank-tile))){})))
 
 (defonce board-state (r/atom (make-board)))
-(defonce turn (r/atom black-tile))
+(defonce current-turn (r/atom black-tile))
 
-(println @turn)
-
-(defn find-current-stones
+(defn get-current-turn-icon
   []
-  (filter (fn [[_ v]]
-            (= v @turn)) @board-state))
-(find-current-stones)
+  @current-turn)
 
-(defn is-valid-coord?
-  [num]
-  (and (num >= 0) (num < 8)))
+(defn get-other-icon
+  []
+  (if (= (get-current-turn-icon) black-tile)
+    white-tile
+    black-tile))
 
-(defn get-neighbours
-  [[x y]]
-  )
+(defn change-current-turn!
+  []
+  (reset! current-turn (get-other-icon)))
+
+(def change-directions {:diagonal-up-left [-1 -1]
+                        :up [-1 0]
+                        :diagonal-up-right [-1 1]
+                        :left [0 -1]
+                        :right [0 1]
+                        :diagonal-down-left [1 -1]
+                        :down [1 0]
+                        :diagonal-down-right [1 1]})
+
+(defn get-neighbouring-squares
+  [current-square]
+  (mapv (fn [[k v]]
+          (->> (mapv + current-square v)
+               (assoc {} k))) change-directions))
+
+(defn find-adjacent-opponent-squares
+  [neighbours]
+  (filter (fn [k]
+            (println k)
+            (= (@board-state (first (vals k))) (get-other-icon))) neighbours))
+
+(defn check-next-square
+  [square]
+  (let [next-square-value (mapv + (change-directions (first (keys square)))
+                                (first (vals square)))]
+    (cond
+      (= (@board-state next-square-value) blank-tile)
+      {(first (keys square)) next-square-value}
+      (= (@board-state next-square-value) (get-other-icon))
+         (check-next-square {(first (keys square)) next-square-value})
+         :else false)))
+
+(defn is-empty?
+  [squares]
+  (->> squares
+       (map check-next-square)))
+
+(defn find-valid-moves
+  [squares]
+  (-> squares
+      (get-neighbouring-squares)
+      (find-adjacent-opponent-squares)
+      (is-empty?)))
+
+(find-valid-moves [3 4])
+
+(map find-valid-moves [[3 4] [4 3]])
+
+(change-current-turn!)
+
+(->> (filter (fn [current]
+       (= (last current) (get-current-turn-icon))) @board-state)
+     (keys)
+     (map find-valid-moves))
 
 (println @board-state)
+
 (defn square
-  [[x y]]
+  [coordinate]
   [:button
       {:on-click (fn []
-                   (swap! board-state assoc [x y] "🥦"))}
-   [:span  (@board-state [x y])]])
-(println @board-state)
+                   (swap! board-state assoc coordinate "🥦"))}
+   [:span  (@board-state coordinate)]])
+
 (defn board-component
   []
-  (->> (for [x (range 8)
-             y (range 8)]
-         [x y])
-       (map (fn [[x y :as coordinate]]
-              (if (= y 7)
-                [:span {:key coordinate} (square coordinate) [:div]]
-                [:span {:key coordinate} (square coordinate)])))))
-
-(map (fn [[k v]]
-       (println k)) @board-state)
-
+  (->> (for [row (range 8)
+             column (range 8)]
+         [row column])
+       (map (fn [[row column :as coordinate]]
+                [:span {:key coordinate} (square coordinate) (when (= column 7) [:div])]))))
 
 (defn app-view []
   [:div
   [:style styles/css]
-   (doall(board-component))])
-(defn render! []
+   (doall (board-component))])
 
+(defn render! []
   (rdom/render
     [app-view]
     (js/document.getElementById "app")))
