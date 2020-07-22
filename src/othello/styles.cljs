@@ -11,7 +11,11 @@
          :width "100vw"}
          [:button
            {:font-size 50
-            :align-self "center"}]])
+            :align-self "center"}]
+         [:.active
+          {:background-color "rgba(255, 0, 0, 0.2)"}]])
+
+
 
 (println style)
 (def css
