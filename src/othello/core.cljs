@@ -107,7 +107,7 @@
              column (range 8)]
          [row column])
        (reduce (fn [board [_row column :as coordinate]]
-                 (conj board [:span {:key coordinate} [square coordinate (contains? valid coordinate)] (when (= column 7) [:br])]))
+                 (conj board [:span {:key coordinate} [square coordinate (valid coordinate)] (when (= column 7) [:br])]))
                [:div]))))
 
 (defn app-view []
