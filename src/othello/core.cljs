@@ -58,7 +58,6 @@
 (defn find-adjacent-opponent-squares
   [neighbours]
   (filter (fn [k]
-            (println k)
             (= (@board-state (first (vals k))) (get-other-icon))) neighbours))
 
 (defn check-next-square
@@ -67,7 +66,7 @@
                                 (first (vals square)))]
     (cond
       (= (@board-state next-square-value) blank-tile)
-      {(first (keys square)) next-square-value}
+        next-square-value
       (= (@board-state next-square-value) (get-other-icon))
          (check-next-square {(first (keys square)) next-square-value})
          :else false)))
@@ -75,7 +74,7 @@
 (defn is-empty?
   [squares]
   (->> squares
-       (map check-next-square)))
+       (mapv check-next-square)))
 
 (defn find-valid-moves
   [square]
@@ -84,29 +83,32 @@
       (find-adjacent-opponent-squares)
       (is-empty?)))
 
-(->> (filter (fn [current]
-       (= (last current) (get-current-turn-icon))) @board-state)
-     (keys)
-     (map find-valid-moves))
+(defn valid-moves
+  []
+  (->> (filter (fn [current]
+                 (= (last current) (get-current-turn-icon))) @board-state)
+       (keys)
+       (map find-valid-moves)
+       (apply concat)
+       (set)))
 
 (defn square
-  [coordinate]
+  [coordinate valid?]
   [:button
-      {:on-click (fn []
-                   (swap! board-state assoc coordinate "🥦"))}
+       {:on-click (fn []
+                   (swap! board-state assoc coordinate (get-current-turn-icon)))
+       :class (when valid? "active")}
    [:span  [@board-state coordinate]]])
 
 (defn board-component
   []
+  (let [valid (valid-moves)]
   (->> (for [row (range 8)
              column (range 8)]
          [row column])
-       #_(map (fn [[row column :as coordinate]]
-                [:span {:key coordinate} [square coordinate] (when (= column 7) [:div])]))
-       #_(doall)
        (reduce (fn [board [_row column :as coordinate]]
-                 (conj board [:span {:key coordinate} [square coordinate] (when (= column 7) [:br])]))
-               [:div])))
+                 (conj board [:span {:key coordinate} [square coordinate (contains? valid coordinate)] (when (= column 7) [:br])]))
+               [:div]))))
 
 (defn app-view []
   [:div
