@@ -78,44 +78,40 @@
        (map check-next-square)))
 
 (defn find-valid-moves
-  [squares]
-  (-> squares
+  [square]
+  (-> square
       (get-neighbouring-squares)
       (find-adjacent-opponent-squares)
       (is-empty?)))
-
-(find-valid-moves [3 4])
-
-(map find-valid-moves [[3 4] [4 3]])
-
-(change-current-turn!)
 
 (->> (filter (fn [current]
        (= (last current) (get-current-turn-icon))) @board-state)
      (keys)
      (map find-valid-moves))
 
-(println @board-state)
-
 (defn square
   [coordinate]
   [:button
       {:on-click (fn []
                    (swap! board-state assoc coordinate "🥦"))}
-   [:span  (@board-state coordinate)]])
+   [:span  [@board-state coordinate]]])
 
 (defn board-component
   []
   (->> (for [row (range 8)
              column (range 8)]
          [row column])
-       (map (fn [[row column :as coordinate]]
-                [:span {:key coordinate} (square coordinate) (when (= column 7) [:div])]))))
+       #_(map (fn [[row column :as coordinate]]
+                [:span {:key coordinate} [square coordinate] (when (= column 7) [:div])]))
+       #_(doall)
+       (reduce (fn [board [_row column :as coordinate]]
+                 (conj board [:span {:key coordinate} [square coordinate] (when (= column 7) [:br])]))
+               [:div])))
 
 (defn app-view []
   [:div
   [:style styles/css]
-   (doall (board-component))])
+   [board-component]])
 
 (defn render! []
   (rdom/render
