@@ -61,40 +61,30 @@
                (->> (mapv + current-coordinates change-values)
                     (assoc {} direction))))))
 
-;; @board-state
-;; get-other-icon
-
 (defn find-neighbouring-stones
-  [neighbours]
+  [board neighbours]
   (->> neighbours
        (filter (fn [neighbour]
                  (let [[_ coordinate] (first neighbour)]
-                 (= (@board-state coordinate) (get-other-icon)))))))
-
-;; board-state
-;; get-other-icon
+                 (= (board coordinate) (get-other-icon)))))))
 
 (defn check-next-square
-  [square]
+  [board opponents-stone square]
   (let [[direction coordinate] (first square)
          next-square-value
            (mapv + (change-directions direction) coordinate)]
-    (condp = (@board-state next-square-value)
+    (condp = (board next-square-value)
       blank-tile next-square-value
-      get-other-icon (check-next-square {direction next-square-value})
+      opponents-stone (check-next-square {direction next-square-value})
       nil)))
 
-(defn leads-to-blank-tile?
-  [squares]
-  (->> squares
-       (mapv check-next-square)))
-
 (defn find-valid-moves
-  [square]
-  (-> square
+  [coordinate]
+  (->> coordinate
       (get-neighbouring-coordinates)
-      (find-neighbouring-stones)
-      (leads-to-blank-tile?)))
+      (find-neighbouring-stones @board-state)
+      (mapv (fn [current]
+              (check-next-square @board-state (get-other-icon) current)))))
 
 (defn valid-moves
   []
