@@ -62,35 +62,29 @@
                     (assoc {} direction))))))
 
 (defn find-neighbouring-stones
-  [neighbours]
+  [board neighbours]
   (->> neighbours
        (filter (fn [neighbour]
                  (let [[_ coordinate] (first neighbour)]
-                 (= (@board-state coordinate) (get-other-icon)))))))
+                 (= (board coordinate) (get-other-icon)))))))
 
 (defn check-next-square
-  [square]
-  (let [[direction coordinate :as neighbour] (first square)]
-  (let [next-square-value (mapv + (change-directions direction)
-                                coordinate)]
-    (cond
-      (= (@board-state next-square-value) blank-tile)
-        next-square-value
-      (= (@board-state next-square-value) (get-other-icon))
-         (check-next-square {direction next-square-value})
-         :else nil))))
-
-(defn leads-to-blank-tile
-  [squares]
-  (->> squares
-       (mapv check-next-square)))
+  [board opponents-stone square]
+  (let [[direction coordinate] (first square)
+         next-square-value
+           (mapv + (change-directions direction) coordinate)]
+    (condp = (board next-square-value)
+      blank-tile next-square-value
+      opponents-stone (check-next-square {direction next-square-value})
+      nil)))
 
 (defn find-valid-moves
-  [square]
-  (-> square
+  [coordinate]
+  (->> coordinate
       (get-neighbouring-coordinates)
-      (find-neighbouring-stones)
-      (leads-to-blank-tile)))
+      (find-neighbouring-stones @board-state)
+      (mapv (fn [current]
+              (check-next-square @board-state (get-other-icon) current)))))
 
 (defn valid-moves
   []
@@ -98,7 +92,6 @@
                  (= (last current) (get-current-turn-icon))) @board-state)
        (keys)
        (mapcat find-valid-moves)
-       #_(apply concat)
        (set)))
 
 (defn square
