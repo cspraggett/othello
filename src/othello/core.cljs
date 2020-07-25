@@ -62,19 +62,18 @@
                     (assoc {} direction))))))
 
 (defn find-neighbouring-stones
-  [board neighbours]
+  [board opponents-stone neighbours]
   (->> neighbours
        (filter (fn [neighbour]
                  (let [[_ coordinate] (first neighbour)]
-                 (= (board coordinate) (get-other-icon)))))))
+                 (= (board coordinate) opponents-stone))))))
 
 (defn check-next-square
-  [board opponents-stone square]
+  [board opponents-stone target square]
   (let [[direction coordinate] (first square)
-         next-square-value
-           (mapv + (change-directions direction) coordinate)]
+         next-square-value (mapv + (change-directions direction) coordinate)]
     (condp = (board next-square-value)
-      blank-tile next-square-value
+      target next-square-value
       opponents-stone (check-next-square {direction next-square-value})
       nil)))
 
@@ -82,9 +81,9 @@
   [coordinate]
   (->> coordinate
       (get-neighbouring-coordinates)
-      (find-neighbouring-stones @board-state)
+      (find-neighbouring-stones @board-state (get-other-icon))
       (mapv (fn [current]
-              (check-next-square @board-state (get-other-icon) current)))))
+              (check-next-square @board-state (get-other-icon) blank-tile current)))))
 
 (defn valid-moves
   []
@@ -94,11 +93,44 @@
        (mapcat find-valid-moves)
        (set)))
 
+(defn generate-moves
+  [origin values]
+  (reduce (fn [coll value]
+            (let [direction  (first (first value))]
+              (->> (loop [current-coordinate origin
+                     change-coordinates []]
+                (if (= (@board-state current-coordinate) (get-current-turn-icon))
+                  change-coordinates
+                  (recur (mapv + (change-directions direction) current-coordinate) (conj change-coordinates current-coordinate))))
+                   (conj coll)))) [] values))
+
+(defn change-tiles!
+  [coordinates]
+  (println "in change-tiles! "coordinates)
+  (doseq [current coordinates]
+    (swap! board-state assoc current (get-current-turn-icon))))
+
+(defn make-move
+  [coordinate]
+  (->> coordinate
+       (get-neighbouring-coordinates)
+       (find-neighbouring-stones @board-state (get-other-icon))
+       (filterv (fn [current]
+               (check-next-square @board-state (get-other-icon) (get-current-turn-icon) current)))
+       (generate-moves coordinate)
+       (first)
+       (change-tiles!))
+  (change-current-turn!))
+
+
+#_(make-move [1 4])
+
 (defn square
   [coordinate valid?]
   [:button
        {:on-click (fn []
-                   (swap! board-state assoc coordinate (get-current-turn-icon)))
+                    (println "clicked: " coordinate)
+                   (make-move coordinate))
        :class (when valid? "active")}
    [:span  [@board-state coordinate]]])
 
