@@ -24,7 +24,6 @@
                    (assoc board coordinate blank-tile))){})))
 
 (defonce board-state (r/atom (make-board)))
-#_(defonce current-turn (r/atom black-tile))
 
 (defn current-turn
   []
@@ -112,9 +111,8 @@
 
 (defn change-tiles!
   [coordinates]
-  (println "in change-tiles! "coordinates)
-  (doseq [current coordinates]
-    (swap! board-state assoc current (get-current-turn-icon))))
+  (let [current-icon (get-current-turn-icon)](doseq [current coordinates]
+    (swap! board-state assoc current current-icon))))
 
 (defn make-move
   [coordinate]
