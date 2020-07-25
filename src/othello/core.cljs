@@ -74,7 +74,7 @@
          next-square-value (mapv + (change-directions direction) coordinate)]
     (condp = (board next-square-value)
       target next-square-value
-      opponents-stone (check-next-square {direction next-square-value})
+      opponents-stone (check-next-square board opponents-stone target {direction next-square-value})
       nil)))
 
 (defn find-valid-moves
