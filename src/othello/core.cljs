@@ -102,11 +102,10 @@
                 (if (= (@board-state current-coordinate) (get-current-turn-icon))
                   change-coordinates
                   (recur (mapv + (change-directions direction) current-coordinate) (conj change-coordinates current-coordinate))))
-                   (conj coll)))) [] values))
+                   (into coll)))) [] values))
 
 (defn change-tiles!
   [coordinates]
-  (println "in change-tiles! "coordinates)
   (doseq [current coordinates]
     (swap! board-state assoc current (get-current-turn-icon))))
 
@@ -118,18 +117,13 @@
        (filterv (fn [current]
                (check-next-square @board-state (get-other-icon) (get-current-turn-icon) current)))
        (generate-moves coordinate)
-       (first)
        (change-tiles!))
   (change-current-turn!))
-
-
-#_(make-move [1 4])
 
 (defn square
   [coordinate valid?]
   [:button
        {:on-click (fn []
-                    (println "clicked: " coordinate)
                    (make-move coordinate))
        :class (when valid? "active")}
    [:span  [@board-state coordinate]]])
