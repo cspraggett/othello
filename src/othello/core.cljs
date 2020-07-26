@@ -24,22 +24,27 @@
                    (assoc board coordinate blank-tile))){})))
 
 (defonce board-state (r/atom (make-board)))
-(defonce current-turn (r/atom black-tile))
+
+(defn current-turn
+  []
+  (let [square-count (->> @board-state
+       (filter (fn [[_ value]]
+                 (not= value blank-tile)))
+       count)]
+    (if (zero? (mod square-count 2))
+      black-tile
+      white-tile)))
 
 (defn get-current-turn-icon
   []
-  @current-turn)
+  (current-turn))
 
 (defn get-other-icon
   []
   (if (= (get-current-turn-icon) black-tile)
     white-tile
     black-tile))
-
-(defn change-current-turn!
-  []
-  (reset! current-turn (get-other-icon)))
-
+(get-other-icon)
 ;; change-directions matches the direction of change on the board and
 ;; the x y values in a vector, to add to a coordinate.
 
@@ -106,6 +111,7 @@
 
 (defn change-tiles!
   [coordinates]
+
   (doseq [current coordinates]
     (swap! board-state assoc current (get-current-turn-icon))))
 
@@ -117,6 +123,7 @@
        (filterv (fn [current]
                (check-next-square @board-state (get-other-icon) (get-current-turn-icon) current)))
        (generate-moves coordinate)
+
        (change-tiles!))
   (change-current-turn!))
 
