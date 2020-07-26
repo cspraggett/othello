@@ -52,6 +52,11 @@
                         :down [1 0]
                         :diagonal-down-right [1 1]})
 
+(defn get-stone-count
+  [stone]
+  (->> (filter (fn [[_ current-stone]]
+                 (= stone current-stone)) @board-state)
+       (count)))
 
 (defn get-neighbouring-coordinates
   "Takes a set of coordinates and maps the direction and coordinates of neighbouring squares."
