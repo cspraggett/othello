@@ -106,14 +106,6 @@
 
 (defn change-tiles!
   [coordinates]
-<<<<<<<
-  (println "in change-tiles! "coordinates)
-  (doseq [current coordinates]
-    (swap! board-state assoc current (get-current-turn-icon))))
-=======
-
->>>>>>>
-
   (doseq [current coordinates]
     (swap! board-state assoc current (get-current-turn-icon))))
 
