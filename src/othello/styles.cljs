@@ -8,10 +8,7 @@
          :align-items "center"
          :justify-content "center"
          :height "100vh"
-         :width "100vw"
-         :margin 0
-         :padding 0
-         :font-weight "normal"}
+         :width "100vw"}
          [:button
            {:font-size 50
             :align-self "center"
