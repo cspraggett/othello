@@ -134,6 +134,15 @@
        :class (when valid? "active")}
    [:span  [@board-state coordinate]]])
 
+(defn header-component
+  []
+  [:div.header
+   [:span.score
+    [:h1 black-tile " " [get-stone-count black-tile]]]
+   [:span [:h1 "Current turn: " [get-current-turn-icon]]]
+   [:span.score
+    [:h1 white-tile " " [get-stone-count white-tile]]]])
+
 (defn board-component
   []
   (let [valid (valid-moves)]
@@ -147,6 +156,7 @@
 (defn app-view []
   [:div
   [:style styles/css]
+  [header-component]
    [board-component]])
 
 (defn render! []
