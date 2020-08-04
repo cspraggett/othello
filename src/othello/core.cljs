@@ -25,6 +25,7 @@
 
 (defonce board-state (r/atom (make-board)))
 (defonce current-turn (r/atom black-tile))
+(defonce no-valid-moves? (r/atom false))
 
 (defn get-current-turn-icon
   []
@@ -90,13 +91,39 @@
       (mapv (fn [current]
               (check-next-square @board-state (get-other-icon) blank-tile current)))))
 
+(defn print-value
+  [data]
+  (println data)
+  data)
+
+(defn get-winner []
+  (if (> (get-stone-count black-tile) (get-stone-count white-tile))
+    black-tile
+    white-tile))
+
+(defn no-moves
+  [fun]
+  (if (true? @no-valid-moves?)
+    (js/alert (str (get-winner) " wins!"))
+    (do (reset! no-valid-moves? true)
+           (js/alert "No valid moves.")
+           (fun))))
+
+(defn check-if-moves
+  [fun data]
+  (if (empty? data)
+    (no-moves fun)
+    (do (reset! no-valid-moves? false)
+           (set data))))
+
 (defn valid-moves
   []
   (->> (filter (fn [current]
                  (= (last current) (get-current-turn-icon))) @board-state)
        (keys)
        (mapcat find-valid-moves)
-       (set)))
+       (filter identity)
+       (check-if-moves valid-moves)))
 
 (defn generate-moves
   [origin values]
